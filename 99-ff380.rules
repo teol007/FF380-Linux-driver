@@ -1,0 +1,25 @@
+# /etc/udev/rules.d/99-ff380.rules
+#
+# Trust FF380 RaceMaster — bind the ff380 kernel module and allow
+# non-root access to the resulting input device.
+#
+# Install:
+#   sudo cp 99-ff380.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+#
+# When the wheel is plugged in, load the ff380 module.
+
+ACTION=="add", SUBSYSTEM=="usb", \
+    ATTRS{idVendor}=="06d6", ATTRS{idProduct}=="005f", \
+    RUN+="/usr/sbin/modprobe ff380"
+
+# Allow plugdev group (and thus any logged-in user via logind/uaccess)
+# to access the raw USB device node
+SUBSYSTEM=="usb", \
+    ATTRS{idVendor}=="06d6", ATTRS{idProduct}=="005f", \
+    MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Allow access to the input event node created by the driver
+SUBSYSTEM=="input", \
+    ATTRS{idVendor}=="06d6", ATTRS{idProduct}=="005f", \
+    MODE="0660", GROUP="plugdev", TAG+="uaccess"
